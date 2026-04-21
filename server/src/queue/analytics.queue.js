@@ -1,14 +1,19 @@
 import { Queue } from "bullmq";
 
-// BullMQ connection config (uses same Redis instance)
-const connection = {
-  host: process.env.REDIS_HOST || "localhost",
-  port: Number(process.env.REDIS_PORT) || 6379,
+const getQueueConnection = () => {
+  if (process.env.REDIS_URL) {
+    return { url: process.env.REDIS_URL };
+  }
+
+  return {
+    host: process.env.REDIS_HOST || "localhost",
+    port: Number(process.env.REDIS_PORT) || 6379,
+  };
 };
 
 // Create the analytics queue
 export const analyticsQueue = new Queue("analytics", {
-  connection,
+  connection: getQueueConnection(),
   defaultJobOptions: {
     attempts: 3,                      // Retry up to 3 times on failure
     backoff: { type: "exponential", delay: 1000 },

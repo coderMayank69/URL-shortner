@@ -1,10 +1,15 @@
 import { Worker } from "bullmq";
 import { recordClick } from "../dao/analytics.dao.js";
 
-// BullMQ connection config
-const connection = {
-  host: process.env.REDIS_HOST || "localhost",
-  port: Number(process.env.REDIS_PORT) || 6379,
+const getWorkerConnection = () => {
+  if (process.env.REDIS_URL) {
+    return { url: process.env.REDIS_URL };
+  }
+
+  return {
+    host: process.env.REDIS_HOST || "localhost",
+    port: Number(process.env.REDIS_PORT) || 6379,
+  };
 };
 
 /**
@@ -19,7 +24,7 @@ export const startAnalyticsWorker = () => {
       await recordClick(urlId, ipAddress, userAgent);
     },
     {
-      connection,
+      connection: getWorkerConnection(),
       concurrency: 5, // Process up to 5 jobs simultaneously
     }
   );
