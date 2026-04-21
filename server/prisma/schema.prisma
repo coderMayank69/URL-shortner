@@ -1,0 +1,52 @@
+// Prisma Schema — URL Shortener (PostgreSQL)
+// Run: npx prisma migrate dev --name init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  avatar    String?  @default("https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp")
+  createdAt DateTime @default(now()) @map("created_at")
+  urls      Url[]
+
+  @@map("users")
+}
+
+model Url {
+  id          Int         @id @default(autoincrement())
+  originalUrl String      @map("original_url")
+  shortCode   String      @unique @map("short_code")
+  userId      Int?        @map("user_id")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  expiresAt   DateTime?   @map("expiry")
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  analytics   Analytics[]
+
+  // Indexes for fast lookups
+  @@index([shortCode])
+  @@index([userId])
+  @@map("urls")
+}
+
+model Analytics {
+  id        Int      @id @default(autoincrement())
+  urlId     Int      @map("url_id")
+  timestamp DateTime @default(now())
+  ipAddress String   @map("ip_address")
+  userAgent String   @map("user_agent")
+  url       Url      @relation(fields: [urlId], references: [id], onDelete: Cascade)
+
+  @@index([urlId])
+  @@index([timestamp])
+  @@map("analytics")
+}
