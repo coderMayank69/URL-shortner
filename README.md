@@ -100,6 +100,46 @@ cd client && npm run dev
 - Backend: http://localhost:3000
 - Frontend: http://localhost:5173
 
+## 🐳 Docker Deployment
+
+### Prerequisite
+- Docker Desktop (with Docker Compose)
+
+### 1. Build and start all services
+
+```bash
+docker compose up --build -d
+```
+
+This starts:
+- Frontend (Nginx + React build): http://localhost:5173
+- Backend (Express API): http://localhost:3000
+- PostgreSQL and Redis as internal Docker services (not published to host ports)
+
+### 2. Check logs
+
+```bash
+docker compose logs -f backend
+```
+
+### 3. Stop everything
+
+```bash
+docker compose down
+```
+
+### 4. Stop and remove database/cache volumes
+
+```bash
+docker compose down -v
+```
+
+Notes:
+- Backend runs `prisma migrate deploy` automatically on container startup.
+- For real production, set a strong `JWT_SECRET` in `docker-compose.yml`.
+- `COOKIE_SECURE` is set to `false` for local HTTP testing. Set it to `true` behind HTTPS.
+- If you need host access to Postgres/Redis, add port mappings in `docker-compose.yml`.
+
 ## 📡 API Reference
 
 | Method | Endpoint | Auth | Description |
