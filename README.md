@@ -97,8 +97,9 @@ cd server && npm run dev
 cd client && npm run dev
 ```
 
-- Backend: http://localhost:3000
-- Frontend: http://localhost:5173
+- Backend: https://0c756c136ae1ea.lhr.life
+- Frontend: https://ff0d23625eb2d1.lhr.life/
+- API health check:  https://0c756c136ae1ea.lhr.life/health
 
 ## 🐳 Docker Deployment
 
