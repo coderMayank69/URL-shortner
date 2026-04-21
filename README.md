@@ -141,6 +141,14 @@ Notes:
 - `COOKIE_SECURE` is set to `false` for local HTTP testing. Set it to `true` behind HTTPS.
 - If you need host access to Postgres/Redis, add port mappings in `docker-compose.yml`.
 
+## ▲ Vercel Deployment
+
+Deploy backend and frontend as separate Vercel projects.
+
+- Backend root: `server`
+- Frontend root: `client`
+- Full guide: see `DEPLOY_VERCEL.md`
+
 ## 📡 API Reference
 
 | Method | Endpoint | Auth | Description |

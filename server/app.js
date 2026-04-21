@@ -17,17 +17,21 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const isVercel = process.env.VERCEL === "1";
+const normalizeOrigin = (value = "") => value.trim().replace(/\/+$/, "");
 const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
   .split(",")
-  .map((origin) => origin.trim())
+  .map((origin) => normalizeOrigin(origin))
   .filter(Boolean);
 
 // ─── Middleware ──────────────────────────────────────────────────────────────
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    const normalizedOrigin = normalizeOrigin(origin || "");
+    if (!origin || allowedOrigins.includes(normalizedOrigin)) {
       return callback(null, true);
     }
+    console.warn(`[CORS] Blocked origin: ${origin}. Allowed: ${allowedOrigins.join(", ")}`);
     return callback(new Error(`CORS blocked for origin: ${origin}`));
   },
   credentials: true,
@@ -56,13 +60,17 @@ app.get("/:id", redirectFromShortUrl);
 // ─── Global Error Handler ────────────────────────────────────────────────────
 app.use(errorHandler);
 
+export default app;
+
 // ─── Start Server ─────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`\n🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📦 Environment: ${process.env.NODE_ENV || "development"}`);
+if (!isVercel) {
+  app.listen(PORT, () => {
+    console.log(`\n🚀 Server running on http://localhost:${PORT}`);
+    console.log(`📦 Environment: ${process.env.NODE_ENV || "development"}`);
 
-  // Start BullMQ analytics worker (processes click events in background)
-  startAnalyticsWorker();
+    // Start BullMQ analytics worker only in non-serverless environments.
+    startAnalyticsWorker();
 
-  // Note: Prisma connects lazily on first query — no explicit connect needed
-});
+    // Note: Prisma connects lazily on first query — no explicit connect needed
+  });
+}
